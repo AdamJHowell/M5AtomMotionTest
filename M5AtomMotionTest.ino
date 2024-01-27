@@ -1,8 +1,5 @@
-#include <Wire.h>
 #include <M5Atom.h>
-#include <M5_DLight.h>
-#include "AtomMotion.h"
-#include <Arduino.h>
+#include <AtomMotion.h>
 #include <array>
 
 
@@ -21,17 +18,17 @@
 #define WHITE   0xFFFFFF
 
 
-AtomMotion atomMotion;                                                    // An object to manage the ATOM Motion.
-xSemaphoreHandle CtlSemaphore;                                            // A semaphore the ATOM Motion uses to control motors and/or servos.
-unsigned long lastLoop = 0;                                               // Tracks the last time the main loop executed.
-const unsigned int NUM_SENSORS = 4;                                       // The number of sensors.
-const unsigned long loopDelay = 10;                                       // The maximum value of 4,294,967,295 allows for a delay of about 49.7 days.
-const byte sdaGPIO = 26;                                                  // Use this to set the SDA GPIO if your board uses a non-standard GPIOs for the I2C bus.
-const byte sclGPIO = 32;                                                  // Use this to set the SCL GPIO if your board uses a non-standard GPIOs for the I2C bus.
-const int PCA_ADDRESS = 0x70;                                             // The I2C address of the Pa.HUB.
-std::array<M5_DLight, NUM_SENSORS> sensorArray = {};                      // An array of DLIGHT sensor objects.
-std::array<uint16_t, NUM_SENSORS> sensorAddresses = { 0, 1, 4, 5 };       // An array of the Pa.HUB ports with DLIGHT sensors attached.
-std::array<uint16_t, NUM_SENSORS> luxValues = { 2112, 2112, 2112, 2112 }; // An array of light readings, one per sensor.
+AtomMotion atomMotion;                                                           // An object to manage the ATOM Motion.
+xSemaphoreHandle CtlSemaphore;                                                   // A semaphore the ATOM Motion uses to control motors and/or servos.
+unsigned long lastLoop                             = 0;                          // Tracks the last time the main loop executed.
+const unsigned int NUM_SENSORS                     = 4;                          // The number of sensors.
+const unsigned long loopDelay                      = 10;                         // The maximum value of 4,294,967,295 allows for a delay of about 49.7 days.
+const byte sdaGPIO                                 = 26;                         // Use this to set the SDA GPIO if your board uses a non-standard GPIOs for the I2C bus.
+const byte sclGPIO                                 = 32;                         // Use this to set the SCL GPIO if your board uses a non-standard GPIOs for the I2C bus.
+const int PCA_ADDRESS                              = 0x70;                       // The I2C address of the Pa.HUB.
+std::array<M5_DLight, NUM_SENSORS> sensorArray     = {};                         // An array of DLIGHT sensor objects.
+std::array<uint16_t, NUM_SENSORS>  sensorAddresses = { 0, 1, 4, 5 };             // An array of the Pa.HUB ports with DLIGHT sensors attached.
+std::array<uint16_t, NUM_SENSORS>  luxValues       = { 2112, 2112, 2112, 2112 }; // An array of light readings, one per sensor.
 unsigned long                      lastPrintLoop   = 0;                          // Tracks the last time the print loop executed.
 const unsigned long                printLoopDelay  = 1000;                       // The minimum time between serial printing of the lux values.
 const unsigned int                 SERVO_MIN       = 500;                        // The minimum pulse width for the servos.
@@ -40,14 +37,17 @@ const unsigned int                 DEAD_BAND       = 20;                        
 uint16_t                           pulseWidth      = 1500;                       // Min: 500, Max: 2500, Neutral: 1500
 
 
-void pcaSelect( uint8_t i )
+/*
+ * The channelSelect function changes the current active channel of the PaHUB I2C multiplexer.
+ */
+void channelSelect( uint8_t i )
 {
-	if( i > 7 )
-		return;
-	Wire.beginTransmission( PCA_ADDRESS );
-	Wire.write( 1 << i );
-	Wire.endTransmission();
-} // End of pcaSelect()
+   if( i > 7 )
+      return;
+   Wire.beginTransmission( PCA_ADDRESS );
+   Wire.write( 1 << i );
+   Wire.endTransmission();
+} // End of channelSelect()
 
 
 /*
@@ -90,7 +90,7 @@ void setup()
 
 	for( uint8_t i = 0; i < NUM_SENSORS; i++ )
 	{
-		pcaSelect( sensorAddresses[i] );
+		channelSelect( sensorAddresses[i] );
 		sensorArray[i].begin();
 		sensorArray[i].setMode( CONTINUOUSLY_H_RESOLUTION_MODE );
 	}
@@ -104,7 +104,7 @@ void loop()
   // Read all sensors before acting on the values.
   for( uint8_t i = 0; i < NUM_SENSORS; i++ )
   {
-    pcaSelect( sensorAddresses[i] );
+    channelSelect( sensorAddresses[i] );
     luxValues[i] = sensorArray[i].getLUX();
   }
   // Sum the top sensors.
