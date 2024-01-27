@@ -17,8 +17,6 @@ include_directories( .
 
 add_executable( M5AtomMotionTest
 		M5AtomMotionTest.ino
-		AtomMotion.h
-		AtomMotion.cpp
 )
 
 set_target_properties( M5AtomMotionTest PROPERTIES LINKER_LANGUAGE CXX )
