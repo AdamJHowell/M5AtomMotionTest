@@ -1,7 +1,7 @@
 #include <M5Atom.h>
 #include <AtomMotion.h>
 #include <array>
-
+#include <M5_DLight.h>
 
 #define PORT_B  23
 #define PORT_C  22
@@ -19,7 +19,7 @@
 
 
 AtomMotion atomMotion;                                                           // An object to manage the ATOM Motion.
-xSemaphoreHandle CtlSemaphore;                                                   // A semaphore the ATOM Motion uses to control motors and/or servos.
+//xSemaphoreHandle CtlSemaphore;                                                   // A semaphore the ATOM Motion uses to control motors and/or servos.
 unsigned long lastLoop                             = 0;                          // Tracks the last time the main loop executed.
 const unsigned int NUM_SENSORS                     = 4;                          // The number of sensors.
 const unsigned long loopDelay                      = 10;                         // The maximum value of 4,294,967,295 allows for a delay of about 49.7 days.
@@ -56,14 +56,16 @@ void channelSelect( uint8_t i )
  */
 void TaskMotion( void *pvParameters )
 {
-	while( 1 )
-	{
-    // Set each servo to the computed speed.
-		for( int ch = 1; ch < 5; ch++ )
-			atomMotion.SetServoPulse( ch, pulseWidth );
-    // Delay for five ticks to allow other threads to regain control.
-		vTaskDelay( 5 / portTICK_RATE_MS );
-	}
+   while( 1 )
+   {
+      // Set each servo to the computed speed.
+      atomMotion.SetServoPulse( 1, 2500 );
+      atomMotion.SetServoPulse( 2, pulseWidth );
+      atomMotion.SetServoPulse( 3, pulseWidth );
+      atomMotion.SetServoPulse( 4, pulseWidth );
+      // Delay for five ticks to allow other threads to regain control.
+      vTaskDelay( 5 / portTICK_RATE_MS );
+   }
 } // End of TaskMotion()
 
 
@@ -75,7 +77,7 @@ void setup()
 	Wire.begin( sdaGPIO, sclGPIO );
 	// Wire.begin() must happen before atomMotion.Init().
 	atomMotion.Init();
-	vSemaphoreCreateBinary( CtlSemaphore );
+//	vSemaphoreCreateBinary( CtlSemaphore );
 	xTaskCreatePinnedToCore(
 		TaskMotion,	  // Pointer to the task entry function.
 		"TaskMotion", // A descriptive name for the task.
@@ -123,6 +125,8 @@ void loop()
     // map( value, fromLow, fromHigh, toLow, toHigh );
     pulseWidth = map( rowValue, -3000, 3000, SERVO_MIN, SERVO_MAX );
   }
+
+  pulseWidth = 500;
 
   if( M5.Btn.wasPressed() )
   {
