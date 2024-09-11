@@ -1,5 +1,5 @@
 #include <M5Atom.h>
-#include <AtomMotion.h>
+#include "AtomMotion.h"
 #include <array>
 #include <M5_DLight.h>
 
