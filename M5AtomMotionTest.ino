@@ -19,7 +19,7 @@
 
 
 AtomMotion atomMotion;                                                           // An object to manage the ATOM Motion.
-//xSemaphoreHandle CtlSemaphore;                                                   // A semaphore the ATOM Motion uses to control motors and/or servos.
+//xSemaphoreHandle CtlSemaphore;                                                 // A semaphore the ATOM Motion uses to control motors and/or servos.
 unsigned long lastLoop                             = 0;                          // Tracks the last time the main loop executed.
 const unsigned int NUM_SENSORS                     = 4;                          // The number of sensors.
 const unsigned long loopDelay                      = 10;                         // The maximum value of 4,294,967,295 allows for a delay of about 49.7 days.
